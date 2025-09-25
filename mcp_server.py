@@ -12,13 +12,15 @@ class MCPServer:
         self.app = FastAPI(title="Plant Insurance MCP Server")
         self.configure_routes()
 
+    # disease,name,state,area_hectare,crop
     def configure_routes(self):
         @self.app.get("/insurance/")
         def get_insurance(
-            disease: str = Query(..., description="Name of the plant disease")
+            disease: str, name: str, state: str, area_hectare: float, crop: str
         ):
-            insurance_options = recommend_insurance(disease)
-            return {"disease": disease, "insurance_options": insurance_options}
+            # Pass the query parameters to the recommend_insurance function
+            # return recommend_insurance(disease, name, state, area_hectare, crop)
+            return recommend_insurance(disease, name, state, area_hectare, crop)
 
     def run(self):
         uvicorn.run(self.app, host="127.0.0.1", port=8000)

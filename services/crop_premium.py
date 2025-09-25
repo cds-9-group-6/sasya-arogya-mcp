@@ -4,7 +4,7 @@ import pandas as pd
 # Load data from CSV files
 def get_crop_premium_data():
     try:
-        crop_df = pd.read_csv("../resources/crop_data.csv")
+        crop_df = pd.read_csv("resources\crop_data.csv")
 
         # --- Data Cleaning: Force columns to be numbers right after loading ---
         crop_df["Scale of Finance (Rs/Hectare)"] = pd.to_numeric(
@@ -20,7 +20,7 @@ def get_crop_premium_data():
             inplace=True,
         )
     except FileNotFoundError:
-        print("Error: Make sure 'crop_data.csv' are in the resources directory.")
+        print("Error: Make sure 'crop_data.csv' is in the resources directory.")
         exit()
     except Exception as e:
         print(f"A critical error occurred while loading or cleaning the CSV files: {e}")

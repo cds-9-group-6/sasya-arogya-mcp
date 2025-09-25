@@ -3,34 +3,46 @@ import pandas as pd
 import random
 from datetime import datetime, timedelta
 
+from farmer import Farmer
 from services.crop_premium import get_crop_premium_data
 from services.insurance_companies import get_registered_insurers
+from services.insurance_certificate import generate_certificate
 
 
-def recommend_insurance(disease_name):
-    insurance_db = {
-        "Powdery Mildew": [
-            {"provider": "AgriShield", "coverage": "₹50,000", "premium": "₹500/year"},
-            {"provider": "CropCare", "coverage": "₹75,000", "premium": "₹650/year"},
-        ],
-        "Leaf Spot": [
-            {"provider": "FarmSecure", "coverage": "₹40,000", "premium": "₹400/year"}
-        ],
-        "Rust": [
-            {"provider": "GreenGuard", "coverage": "₹60,000", "premium": "₹550/year"}
-        ],
-    }
+# def recommend_insurance(disease_name):
+# insurance_db = {
+#     "Powdery Mildew": [
+#         {"provider": "AgriShield", "coverage": "₹50,000", "premium": "₹500/year"},
+#         {"provider": "CropCare", "coverage": "₹75,000", "premium": "₹650/year"},
+#     ],
+#     "Leaf Spot": [
+#         {"provider": "FarmSecure", "coverage": "₹40,000", "premium": "₹400/year"}
+#     ],
+#     "Rust": [
+#         {"provider": "GreenGuard", "coverage": "₹60,000", "premium": "₹550/year"}
+#     ],
+# }
 
-    return insurance_db.get(
-        disease_name,
-        [
-            {
-                "provider": "General AgriPlan",
-                "coverage": "₹30,000",
-                "premium": "₹300/year",
-            }
-        ],
-    )
+# return insurance_db.get(
+#     disease_name,
+#     [
+#         {
+#             "provider": "General AgriPlan",
+#             "coverage": "₹30,000",
+#             "premium": "₹300/year",
+#         }
+#     ],
+# )
+
+
+def recommend_insurance(disease, name, state, area_hectare, crop):
+    # Assume that disease_name has all farmerdetails needed to call
+
+    # farmer_instance = Farmer(name, state, area_hectare, crop)
+    policy_data = calculate_policy_details(name, state, area_hectare, crop)
+    print(f"Generated Policy Data: {policy_data}")
+    response = generate_certificate(policy_data)
+    return response
 
 
 def get_farmer_share_percent(crop_type):
@@ -43,10 +55,10 @@ def get_farmer_share_percent(crop_type):
     return 0.02
 
 
-def calculate_policy_details(farmer) -> dict:
-    farmer_name = farmer.get("name")
-    crop_name = farmer.get("crop")
-    area_hectare = farmer.get("area_hectare")
+def calculate_policy_details(name, state, area_hectare, crop) -> dict:
+    farmer_name = name
+    crop_name = crop
+    area_hectare = area_hectare
     crop_df = get_crop_premium_data()
     companies_df = get_registered_insurers()
 
@@ -103,7 +115,7 @@ def calculate_policy_details(farmer) -> dict:
             "premium_paid_by_govt": round(premium_paid_by_govt, 2),
             "total_sum_insured": round(sum_insured, 2),
         },
-        "terms_conditions": [
+        "terms_and_conditions": [
             "The policy is valid for one year from the date of issuance.",
             "Claims must be reported within 30 days of the incident.",
             "The insured must follow recommended agricultural practices.",

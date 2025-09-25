@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 # Load data from CSV files
 def get_registered_insurers():
     try:
-        companies_df = pd.read_csv("../resources/insurance_companies.csv")
+        companies_df = pd.read_csv("resources\insurance_companies.csv")
         # --- Data Cleaning: Force columns to be numbers right after loading ---
         companies_df["Rate_Multiplier"] = pd.to_numeric(
             companies_df["Rate_Multiplier"], errors="coerce"
