@@ -2,11 +2,19 @@ import farmer
 import pandas as pd
 import random
 from datetime import datetime, timedelta
+from fastapi import FastAPI, Request
+from fastapi.responses import StreamingResponse
+from fastapi.templating import Jinja2Templates
+from xhtml2pdf import pisa
+from io import BytesIO
+
 
 from farmer import Farmer
 from services.crop_premium import get_crop_premium_data
 from services.insurance_companies import get_registered_insurers
-from services.insurance_certificate import generate_certificate
+
+# from services.insurance_certificate import generate_certificate
+from services.insurance_certificate import generate_certificate_fast
 
 
 # def recommend_insurance(disease_name):
@@ -35,13 +43,13 @@ from services.insurance_certificate import generate_certificate
 # )
 
 
-def recommend_insurance(disease, name, state, area_hectare, crop):
+def recommend_insurance(request: Request, disease, name, state, area_hectare, crop):
     # Assume that disease_name has all farmerdetails needed to call
 
     # farmer_instance = Farmer(name, state, area_hectare, crop)
     policy_data = calculate_policy_details(name, state, area_hectare, crop)
     print(f"Generated Policy Data: {policy_data}")
-    response = generate_certificate(policy_data)
+    response = generate_certificate_fast(request, policy_data)
     return response
 
 
