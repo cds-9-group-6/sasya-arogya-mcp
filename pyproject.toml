@@ -1,0 +1,12 @@
+[project]
+name = "sasya-arogya-mcp"
+version = "0.1.0"
+description = "MCP/FastAPI based Agent for Sasya Arogya"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.117.1",
+    "pandas>=2.3.2",
+    "uvicorn>=0.37.0",
+    "xhtml2pdf>=0.2.17",
+]
