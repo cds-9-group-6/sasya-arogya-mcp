@@ -42,12 +42,13 @@ sasya-arogya-mcp/
 	.\venv\Scripts\activate
 	```
 				OR
-	Use uv tool to manage the project dependencies
+	Use uv tool to manage depedencies, virtual env etc.
 
 3. **Install dependencies:**
 	```powershell
-	pip install -r requirements.txt
+	pip install -r requirements.txt  ( NOT RECOMMENDED)
 	```
+	Dependencies are correctly defiend in pyproject.toml ( RECOMMENDED)
 
 ## Running the Application
 
