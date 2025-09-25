@@ -9,10 +9,10 @@ import uvicorn
 
 class MCPServer:
     def __init__(self):
-        self.app = FastAPI(title="Plant Insurance MCP Server")
+        self.app = FastAPI(title="Sasya Arogya MCP Server")
         self.configure_routes()
 
-    # disease,name,state,area_hectare,crop
+    # Request,disease,name,state,area_hectare,crop
     def configure_routes(self):
         @self.app.get("/insurance/")
         def get_insurance(

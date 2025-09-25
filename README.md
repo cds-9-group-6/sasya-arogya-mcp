@@ -6,15 +6,26 @@ A FastAPI-based MCP Agent Server for providing plant insurance recommendations.
 ## Project Structure
 
 ```
+```
 sasya-arogya-mcp/
 │
 ├── requirements.txt
 ├── README.md
 ├── main/
 │   ├── app.py
-│   ├── mcp_server.py
-│   └── services/
-│       └── insurance_advisor.py
+│   └── mcp_server.py
+├── services/
+│   ├── insurance_advisor.py
+│   ├── insurance_certificate.py
+│   ├── pdf_generator.py
+│   └── crop_premium.py
+├── templates/
+│   └── insurance_template.html
+├── resources/
+│   └── india_logo.jpg
+| 	└── crop_data.csv
+| 	└── insurance_companies.csv
+|
 ```
 
 ## Installation
@@ -30,6 +41,8 @@ sasya-arogya-mcp/
 	python -m venv venv
 	.\venv\Scripts\activate
 	```
+				OR
+	Use uv tool to manage the project dependencies
 
 3. **Install dependencies:**
 	```powershell
@@ -44,7 +57,7 @@ From the project root, run:
 python -m main.app
 ```
 
-The FastAPI server will start at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+The FastAPI server will start at [http://127.0.0.1:8000]
 
 ## API Documentation (Swagger UI)
 
@@ -58,9 +71,16 @@ This interface allows you to explore and test the API endpoints directly from yo
 
 - **Endpoint:** `/insurance/`
 - **Method:** GET
-- **Query Parameter:** `disease` (Name of the plant disease)
+- **Query Parameter:** 
+
+`disease` (Name of the plant disease)
 
 **Example:**
 ```
-GET http://127.0.0.1:8000/insurance/?disease=Powdery%20Mildew
+GET http://127.0.0.1:8000/insurance/?disease=NotUsed&name=F124&state=Karnataka&area_hectare=2.4&crop=Wheat
+
+or
+
+uv run .\app.py
+
 ```
