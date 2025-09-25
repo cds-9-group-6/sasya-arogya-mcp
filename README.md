@@ -54,8 +54,11 @@ sasya-arogya-mcp/
 From the project root, run:
 
 ```powershell
-python -m main.app
+python -m app.py
 ```
+or
+
+uv run .\app.py
 
 The FastAPI server will start at [http://127.0.0.1:8000]
 
@@ -74,12 +77,13 @@ This interface allows you to explore and test the API endpoints directly from yo
 - **Query Parameter:** 
 
 `disease` (Name of the plant disease)
-
+`name` (Name of the farmer)
+`state` (State of the farmer)
+`area_hectare` (Area in hectares)
+`crop` (Name of the crop for e.g Wheat)
 **Example:**
 ```
-GET http://127.0.0.1:8000/insurance/?disease=NotUsed&name=F124&state=Karnataka&area_hectare=2.4&crop=Wheat
-
-or
+GET http://127.0.0.1:8000/insurance/?disease=NotUsed&name=Aravind&state=Karnataka&area_hectare=2.4&crop=Wheat
 
 uv run .\app.py
 
