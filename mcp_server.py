@@ -31,3 +31,13 @@ class MCPServer:
 
     def run(self):
         uvicorn.run(self.app, host="127.0.0.1", port=8000)
+
+
+def run_server():
+    # Configure and start the MCP server
+    server = MCPServer()
+    server.run()
+
+
+if __name__ == "__main__":
+    run_server()
