@@ -1,0 +1,7 @@
+vendor_name,location,disease,medicine,price,rating,contact
+AgroCare,Pune,Leaf Spot,Copper Oxychloride,120,4.5,agrocare@example.com
+GreenGrow,Nashik,Leaf Spot,Mancozeb,115,4.2,greengrow@example.com
+EcoFarms,Mumbai,Powdery Mildew,Neem Oil,90,4.6,ecofarms@example.com
+BioAgri,Thane,Powdery Mildew,Sulfur,85,4.3,bioagri@example.com
+FarmShield,Ahmednagar,Blight,Streptomycin,130,4.4,farmshield@example.com
+CropCure,Nagpur,Root Rot,Trichoderma,95,4.1,cropcure@example.com
