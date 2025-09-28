@@ -9,7 +9,7 @@ from services.insurance_certificate import generate_certificate
 from services.insurance_companies import get_registered_insurers
 
 
-def recommend_insurance(request: Request, disease, name, state, area_hectare, crop):
+def recommend_insurance(request: Request, name, state, area_hectare, crop, disease=None):
     policy_data = calculate_policy_details(name, state, area_hectare, crop)
     print(f"Generated Policy Data: {policy_data}")
     response = generate_certificate(request, policy_data)

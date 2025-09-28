@@ -176,11 +176,11 @@ class SasyaArogyaMCPServer:
                     
                     result = recommend_insurance(
                         MockRequest(),
-                        arguments["disease"],
                         arguments["farmer_name"],
                         arguments["state"],
                         arguments["area_hectare"],
-                        arguments["crop"]
+                        arguments["crop"],
+                        arguments.get("disease")  # Optional disease parameter
                     )
                     
                     if hasattr(result, 'body'):
