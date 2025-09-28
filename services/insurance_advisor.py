@@ -1,14 +1,12 @@
-import pandas as pd
 import random
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse
-from fastapi.templating import Jinja2Templates
-from services.crop_premium import get_crop_premium_data
-from services.insurance_companies import get_registered_insurers
 
+from fastapi import Request
+
+from services.crop_premium import get_crop_premium_data
 # from services.insurance_certificate import generate_certificate
 from services.insurance_certificate import generate_certificate
+from services.insurance_companies import get_registered_insurers
 
 
 def recommend_insurance(request: Request, disease, name, state, area_hectare, crop):
