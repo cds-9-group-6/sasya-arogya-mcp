@@ -33,7 +33,8 @@ def calculate_policy_details(name, state, area_hectare, crop) -> dict:
     crop_name = crop
     area_hectare = area_hectare
     crop_df = get_crop_premium_data()
-    companies_df = get_registered_insurers()
+    # Load insurance companies data and reset rates (randomize) for demo purposes
+    companies_df = get_registered_insurers(reset_rates=True)
 
     if not all([farmer_name, crop_name, area_hectare]):
         raise ValueError("All fields are required.")
