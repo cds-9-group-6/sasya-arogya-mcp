@@ -35,3 +35,29 @@ def get_registered_insurers(reset_rates: bool = False) -> pd.DataFrame:
         print("Error: One of the CSV files is empty.")
         exit()
     return companies_df
+
+
+# return top 5 insurers based on Rate_Multiplier
+def get_top_insurers(n=5):
+    try:
+        companies_df = pd.read_csv("resources/insurance_companies.csv")
+        # Update Rate_Multiplier with random values between 0.8 and 1.2
+        companies_df["Rate_Multiplier"] = [
+            round(random.uniform(0.8, 1.2), 2) for _ in range(len(companies_df))
+        ]
+        # Sort by Rate_Multiplier ascending and get top n
+        top_n = companies_df.sort_values("Rate_Multiplier").head(n)
+        # Return list of tuples (Company Name, Rate_Multiplier)
+        return list(zip(top_n["Company Name"], top_n["Rate_Multiplier"]))
+    except Exception as e:
+        print(f"Error in get_top_insurers: {e}")
+        return []
+
+
+def get_top_insurers_prompt(n=5):
+    top_insurers = get_top_insurers(n)
+    # Format as a prompt message
+    prompt_text = "Top insurers and their rate multipliers:\n"
+    for name, rate in top_insurers:
+        prompt_text += f"- {name}: {rate}\n"
+    return {"prompt": prompt_text}
