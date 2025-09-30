@@ -231,9 +231,15 @@ async def execute_tool(name: str, arguments: Dict[str, Any]) -> List[Dict[str, A
         
         result = generate_certificate(MockRequest(), arguments)
         
-        if hasattr(result, 'body'):
-            # If it's a StreamingResponse, extract the PDF data
-            pdf_data = b"".join(result.body)
+        if hasattr(result, 'body_iterator'):
+            # If it's a StreamingResponse, extract the PDF data from the async iterator
+            pdf_data = b""
+            async for chunk in result.body_iterator:
+                if isinstance(chunk, bytes):
+                    pdf_data += chunk
+                else:
+                    pdf_data += chunk.encode('utf-8')
+            
             pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
             
             return [
@@ -265,9 +271,14 @@ async def execute_tool(name: str, arguments: Dict[str, Any]) -> List[Dict[str, A
             arguments.get("disease")  # Optional disease parameter
         )
         
-        if hasattr(result, 'body'):
-            # If it's a StreamingResponse, extract the PDF data
-            pdf_data = b"".join(result.body)
+        if hasattr(result, 'body_iterator'):
+            # If it's a StreamingResponse, extract the PDF data from the async iterator
+            pdf_data = b""
+            async for chunk in result.body_iterator:
+                if isinstance(chunk, bytes):
+                    pdf_data += chunk
+                else:
+                    pdf_data += chunk.encode('utf-8')
             pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
             
             return [

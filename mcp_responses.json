@@ -1,0 +1,356 @@
+{
+  "mcp_server_info": {
+    "name": "Sasya Arogya MCP Server",
+    "version": "1.0.0",
+    "description": "Agricultural insurance and crop management MCP server",
+    "protocols": ["stdio", "http"],
+    "endpoints": {
+      "http": {
+        "base_url": "http://localhost:8000",
+        "health": "/health",
+        "tools": "/tools",
+        "call": "/tools/call",
+        "stream": "/tools/call/stream"
+      }
+    }
+  },
+  "available_tools": [
+    {
+      "name": "calculate_crop_premium",
+      "description": "Calculate insurance premium for a specific crop and area",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "crop": {"type": "string", "description": "Name of the crop"},
+          "area_hectare": {"type": "number", "description": "Area in hectares"},
+          "state": {"type": "string", "description": "State where the crop is grown"}
+        },
+        "required": ["crop", "area_hectare", "state"]
+      }
+    },
+    {
+      "name": "get_insurance_companies",
+      "description": "Get list of available insurance companies",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "state": {"type": "string", "description": "State to filter companies (optional)"}
+        }
+      }
+    },
+    {
+      "name": "generate_insurance_certificate",
+      "description": "Generate an insurance certificate PDF for a farmer",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "policy_id": {"type": "string", "description": "Unique policy identifier"},
+          "farmer_name": {"type": "string", "description": "Name of the farmer"},
+          "farmer_id": {"type": "string", "description": "Farmer identification number"},
+          "insurance_company_name": {"type": "string", "description": "Name of the insurance company"},
+          "company_address": {"type": "string", "description": "Address of the insurance company"},
+          "sum_insured_per_hectare": {"type": "number", "description": "Sum insured per hectare in rupees"},
+          "farmer_share_percent": {"type": "number", "description": "Farmer's share percentage"},
+          "actuarial_rate_percent": {"type": "number", "description": "Actuarial rate percentage"},
+          "cut_off_date": {"type": "string", "description": "Cut-off date for the policy"},
+          "crop_details": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "area_hectare": {"type": "number"},
+              "premium_paid_by_farmer": {"type": "number"},
+              "premium_paid_by_govt": {"type": "number"},
+              "total_sum_insured": {"type": "number"}
+            }
+          },
+          "terms_and_conditions": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "List of terms and conditions"
+          }
+        },
+        "required": ["policy_id", "farmer_name", "farmer_id", "insurance_company_name", "company_address", "sum_insured_per_hectare", "farmer_share_percent", "actuarial_rate_percent", "cut_off_date", "crop_details", "terms_and_conditions"]
+      }
+    },
+    {
+      "name": "recommend_insurance",
+      "description": "Recommend insurance for a farmer based on crop, disease, and location",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "disease": {"type": "string", "description": "Name of the plant disease affecting the crop"},
+          "farmer_name": {"type": "string", "description": "Name of the farmer"},
+          "state": {"type": "string", "description": "State where the farmer is located"},
+          "area_hectare": {"type": "number", "description": "Area of cultivation in hectares"},
+          "crop": {"type": "string", "description": "Name of the crop being cultivated"}
+        },
+        "required": ["disease", "farmer_name", "state", "area_hectare", "crop"]
+      }
+    }
+  ],
+  "sample_responses": {
+    "calculate_crop_premium": {
+      "input": {
+        "crop": "Wheat",
+        "area_hectare": 2.5,
+        "state": "Karnataka"
+      },
+      "output": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Premium calculation for Wheat in Karnataka:\nArea: 2.5 hectares\nPremium per hectare: ₹4915.57\nTotal premium: ₹12288.93\nGovernment subsidy: ₹11060.04\nFarmer contribution: ₹1228.89"
+          }
+        ],
+        "isError": false
+      }
+    },
+    "get_insurance_companies": {
+      "input": {
+        "state": "Karnataka"
+      },
+      "output": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Available insurance companies in Karnataka:\n• General Insurance Corporation of India - New Delhi, India\n• Agriculture Insurance Company of India - Mumbai, India"
+          }
+        ],
+        "isError": false
+      }
+    },
+    "generate_insurance_certificate": {
+      "input": {
+        "policy_id": "PMFBY-2024-001",
+        "farmer_name": "Ramesh Kumar",
+        "farmer_id": "F12345",
+        "insurance_company_name": "ABC Insurance Ltd",
+        "company_address": "123 Main St, Bangalore",
+        "sum_insured_per_hectare": 50000.0,
+        "farmer_share_percent": 2.0,
+        "actuarial_rate_percent": 3.5,
+        "cut_off_date": "2024-12-31",
+        "crop_details": {
+          "name": "Wheat",
+          "area_hectare": 2.5,
+          "premium_paid_by_farmer": 2500.0,
+          "premium_paid_by_govt": 7500.0,
+          "total_sum_insured": 125000.0
+        },
+        "terms_and_conditions": [
+          "This policy covers natural calamities and pest attacks",
+          "Claims must be filed within 15 days of damage",
+          "Assessment will be done by authorized personnel",
+          "Payment will be made within 30 days of claim approval"
+        ]
+      },
+      "output": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Insurance certificate generated successfully. PDF size: 12345 bytes"
+          },
+          {
+            "type": "resource",
+            "uri": "data:application/pdf;base64,JVBERi0xLjQKJcfsj6IKNSAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDMgMCBSCi9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9SZXNvdXJjZXMgPDwKL0ZvbnQgPDwKL0YxIDIgMCBSCj4+Cj4+Ci9Db250ZW50cyA0IDAgUgo+PgplbmRvYmoK...",
+            "mimeType": "application/pdf",
+            "text": "Insurance Certificate PDF"
+          }
+        ],
+        "isError": false
+      }
+    },
+    "recommend_insurance": {
+      "input": {
+        "disease": "Powdery Mildew",
+        "farmer_name": "Suresh Patel",
+        "state": "Gujarat",
+        "area_hectare": 3.0,
+        "crop": "Cotton"
+      },
+      "output": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Insurance recommendation generated successfully. PDF size: 15678 bytes"
+          },
+          {
+            "type": "resource",
+            "uri": "data:application/pdf;base64,JVBERi0xLjQKJcfsj6IKNSAwIG9iago8PAovVHlwZSAvUGFnZQovUGFyZW50IDMgMCBSCi9NZWRpYUJveCBbMCAwIDU5NSA4NDJdCi9SZXNvdXJjZXMgPDwKL0ZvbnQgPDwKL0YxIDIgMCBSCj4+Cj4+Ci9Db250ZW50cyA0IDAgUgo+PgplbmRvYmoK...",
+            "mimeType": "application/pdf",
+            "text": "Insurance Recommendation PDF"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  "streaming_responses": {
+    "calculate_crop_premium_stream": {
+      "input": {
+        "crop": "Rice",
+        "area_hectare": 3.0,
+        "state": "Tamil Nadu"
+      },
+      "stream_events": [
+        {
+          "type": "start",
+          "tool": "calculate_crop_premium"
+        },
+        {
+          "type": "content",
+          "index": 0,
+          "content": {
+            "type": "text",
+            "text": "Premium calculation for Rice in Tamil Nadu:\nArea: 3.0 hectares\nPremium per hectare: ₹0.00\nTotal premium: ₹0.00\nGovernment subsidy: ₹0.00\nFarmer contribution: ₹0.00"
+          }
+        },
+        {
+          "type": "complete"
+        }
+      ]
+    }
+  },
+  "error_responses": {
+    "invalid_tool": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Unknown tool: invalid_tool_name"
+        }
+      ],
+      "isError": false
+    },
+    "execution_error": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Error executing tool calculate_crop_premium: Invalid crop data"
+        }
+      ],
+      "isError": true
+    },
+    "validation_error": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Error executing tool calculate_crop_premium: Missing required field 'crop'"
+        }
+      ],
+      "isError": true
+    }
+  },
+  "response_formats": {
+    "standard_response": {
+      "description": "Standard MCP tool response format",
+      "structure": {
+        "content": [
+          {
+            "type": "text|resource|image",
+            "text": "Human-readable content",
+            "uri": "data:application/pdf;base64,...",
+            "mimeType": "application/pdf"
+          }
+        ],
+        "isError": false
+      }
+    },
+    "streaming_response": {
+      "description": "Streaming MCP tool response format",
+      "structure": {
+        "type": "start|content|complete|error",
+        "tool": "tool_name",
+        "index": 0,
+        "content": {},
+        "message": "Error message"
+      }
+    }
+  },
+  "http_endpoints": {
+    "health_check": {
+      "method": "GET",
+      "endpoint": "/health",
+      "response": {
+        "status": "healthy",
+        "timestamp": 1234567890.123
+      }
+    },
+    "list_tools": {
+      "method": "GET",
+      "endpoint": "/tools",
+      "response": {
+        "tools": [
+          {
+            "name": "calculate_crop_premium",
+            "description": "Calculate insurance premium for a specific crop and area"
+          }
+        ]
+      }
+    },
+    "call_tool": {
+      "method": "POST",
+      "endpoint": "/tools/call",
+      "request_body": {
+        "name": "calculate_crop_premium",
+        "arguments": {
+          "crop": "Wheat",
+          "area_hectare": 2.5,
+          "state": "Karnataka"
+        }
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Premium calculation result..."
+          }
+        ],
+        "isError": false
+      }
+    },
+    "stream_tool": {
+      "method": "POST",
+      "endpoint": "/tools/call/stream",
+      "content_type": "text/event-stream",
+      "request_body": {
+        "name": "calculate_crop_premium",
+        "arguments": {
+          "crop": "Rice",
+          "area_hectare": 3.0,
+          "state": "Tamil Nadu"
+        }
+      },
+      "response": "data: {\"type\": \"start\", \"tool\": \"calculate_crop_premium\"}\n\ndata: {\"type\": \"content\", \"index\": 0, \"content\": {...}}\n\ndata: {\"type\": \"complete\"}\n\n"
+    }
+  },
+  "integration_examples": {
+    "curl_examples": {
+      "health_check": "curl -X GET http://localhost:8000/health",
+      "list_tools": "curl -X GET http://localhost:8000/tools",
+      "call_tool": "curl -X POST http://localhost:8000/tools/call -H 'Content-Type: application/json' -d '{\"name\": \"calculate_crop_premium\", \"arguments\": {\"crop\": \"Wheat\", \"area_hectare\": 2.5, \"state\": \"Karnataka\"}}'",
+      "stream_tool": "curl -X POST http://localhost:8000/tools/call/stream -H 'Content-Type: application/json' -d '{\"name\": \"calculate_crop_premium\", \"arguments\": {\"crop\": \"Rice\", \"area_hectare\": 3.0, \"state\": \"Tamil Nadu\"}}'"
+    },
+    "python_examples": {
+      "http_client": "from mcp_http_client import MCPHTTPClient\nasync with MCPHTTPClient('http://localhost:8000') as client:\n    result = await client.call_tool('calculate_crop_premium', {'crop': 'Wheat', 'area_hectare': 2.5, 'state': 'Karnataka'})",
+      "requests_library": "import requests\nresponse = requests.post('http://localhost:8000/tools/call', json={'name': 'calculate_crop_premium', 'arguments': {'crop': 'Wheat', 'area_hectare': 2.5, 'state': 'Karnataka'}})"
+    }
+  },
+  "deployment_info": {
+    "docker": {
+      "image": "sasya-arogya-mcp:latest",
+      "port": 8000,
+      "health_check": "http://localhost:8000/health"
+    },
+    "docker_compose": {
+      "service_name": "sasya-arogya-mcp",
+      "ports": ["8000:8000"],
+      "volumes": ["./resources:/app/resources:ro"]
+    },
+    "kubernetes": {
+      "deployment_name": "sasya-arogya-mcp",
+      "replicas": 3,
+      "container_port": 8000
+    }
+  }
+}
+

@@ -172,13 +172,30 @@ def generate_certificate(request: Request, certificate_data: dict):
         
         # Build PDF
         doc.build(story)
+        
+        # Ensure the stream is at the beginning and get the content
         pdf_stream.seek(0)
+        pdf_content = pdf_stream.getvalue()
+        
+        # Verify that we have content
+        if not pdf_content:
+            raise Exception("PDF generation failed - no content generated")
+        
+        # Close the original stream
+        pdf_stream.close()
 
         name = certificate_data.get("farmer_name", "certificate")
+        
+        # Create a new BytesIO stream with the PDF content
+        response_stream = BytesIO(pdf_content)
+        
         return StreamingResponse(
-            pdf_stream,
+            response_stream,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"inline; filename={name}_report.pdf"},
+            headers={
+                "Content-Disposition": f"inline; filename={name}_report.pdf",
+                "Content-Length": str(len(pdf_content))
+            },
         )
 
     except Exception as e:
