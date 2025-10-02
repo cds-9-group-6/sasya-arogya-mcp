@@ -19,6 +19,16 @@ from services.insurance_advisor import recommend_insurance
 from services.insurance_certificate import generate_certificate
 from services.insurance_companies import get_insurance_companies
 
+from telemetry import init_telemetry
+
+tracer, meter = init_telemetry(prometheus_port=9000)
+
+# Create a metric counter
+request_counter = meter.create_counter(
+    "mcp_requests_total",
+    description="Total MCP requests processed"
+)
+
 
 # Pydantic models for request/response
 class ToolCallRequest(BaseModel):
@@ -195,13 +205,23 @@ async def execute_tool(name: str, arguments: Dict[str, Any]) -> List[Dict[str, A
     """Execute the specified tool with given arguments"""
     
     if name == "calculate_crop_premium":
-        premium_data = calculate_premium(
+        
+        with tracer.start_as_current_span("calculate_crop_premium") as span:
+            span.set_attribute("tool", "calculate_crop_premium")
+            span.set_attribute("crop", arguments["crop"])
+            span.set_attribute("area_hectare", arguments["area_hectare"])
+            span.set_attribute("state", arguments["state"])
+                
+            # Increment the request counter
+            request_counter.add(1)
+
+            premium_data = calculate_premium(
             arguments["crop"],
             arguments["area_hectare"],
             arguments["state"]
-        )
+            )
         
-        return [{
+            return [{
             "type": "text",
             "text": f"Premium calculation for {arguments['crop']} in {arguments['state']}:\n" +
                    f"Area: {arguments['area_hectare']} hectares\n" +
@@ -209,81 +229,107 @@ async def execute_tool(name: str, arguments: Dict[str, Any]) -> List[Dict[str, A
                    f"Total premium: ₹{premium_data.get('total_premium', 0):.2f}\n" +
                    f"Government subsidy: ₹{premium_data.get('govt_subsidy', 0):.2f}\n" +
                    f"Farmer contribution: ₹{premium_data.get('farmer_contribution', 0):.2f}"
-        }]
+            }]
     
     elif name == "get_insurance_companies":
-        companies = get_insurance_companies(arguments.get("state"))
         
-        company_list = "\n".join([
-            f"• {company['name']} - {company['address']}" 
-            for company in companies
-        ])
+        with tracer.start_as_current_span("get_insurance_companies") as span:
+            span.set_attribute("tool", "get_insurance_companies")
+            if "state" in arguments:
+                span.set_attribute("state", arguments["state"])
+            
+            # Increment the request counter
+            request_counter.add(1)
+            companies = get_insurance_companies(arguments.get("state"))
         
-        return [{
-            "type": "text",
-            "text": f"Available insurance companies{' in ' + arguments['state'] if arguments.get('state') else ''}:\n{company_list}"
-        }]
+            company_list = "\n".join([
+                f"• {company['name']} - {company['address']}" 
+                for company in companies
+            ])
+        
+            return [{
+                "type": "text",
+                "text": f"Available insurance companies{' in ' + arguments['state'] if arguments.get('state') else ''}:\n{company_list}"
+            }]
     
     elif name == "generate_insurance_certificate":
         # Create a mock request object
         class MockRequest:
             pass
-        
-        result = generate_certificate(MockRequest(), arguments)
-        
-        if hasattr(result, 'body'):
-            # If it's a StreamingResponse, extract the PDF data
-            pdf_data = b"".join(result.body)
-            pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+        with tracer.start_as_current_span("generate_insurance_certificate") as span:
+            span.set_attribute("tool", "generate_insurance_certificate")
+            span.set_attribute("policy_id", arguments["policy_id"])
+            span.set_attribute("farmer_name", arguments["farmer_name"])
+            span.set_attribute("insurance_company_name", arguments["insurance_company_name"])
             
-            return [
-                {
-                    "type": "text",
-                    "text": f"Insurance certificate generated successfully. PDF size: {len(pdf_data)} bytes"
-                },
-                {
-                    "type": "resource",
-                    "uri": f"data:application/pdf;base64,{pdf_base64}",
-                    "mimeType": "application/pdf",
-                    "text": "Insurance Certificate PDF"
-                }
-            ]
-        else:
-            return [{"type": "text", "text": str(result)}]
+            # Increment the request counter
+            request_counter.add(1)  
+
+            result = generate_certificate(MockRequest(), arguments)
+        
+            if hasattr(result, 'body'):
+                # If it's a StreamingResponse, extract the PDF data
+                pdf_data = b"".join(result.body)
+                pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+            
+                return [
+                    {
+                        "type": "text",
+                        "text": f"Insurance certificate generated successfully. PDF size: {len(pdf_data)} bytes"
+                    },
+                    {
+                        "type": "resource",
+                        "uri": f"data:application/pdf;base64,{pdf_base64}",
+                        "mimeType": "application/pdf",
+                        "text": "Insurance Certificate PDF"
+                    }
+                ]
+            else:
+                return [{"type": "text", "text": str(result)}]
     
     elif name == "recommend_insurance":
         # Create a mock request object
         class MockRequest:
             pass
-        
-        result = recommend_insurance(
-            MockRequest(),
-            arguments["disease"],
-            arguments["farmer_name"],
-            arguments["state"],
-            arguments["area_hectare"],
-            arguments["crop"]
-        )
-        
-        if hasattr(result, 'body'):
-            # If it's a StreamingResponse, extract the PDF data
-            pdf_data = b"".join(result.body)
-            pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+        with tracer.start_as_current_span("recommend_insurance") as span:
+            span.set_attribute("tool", "recommend_insurance")
+            span.set_attribute("disease", arguments["disease"])
+            span.set_attribute("farmer_name", arguments["farmer_name"])
+            span.set_attribute("state", arguments["state"])
+            span.set_attribute("area_hectare", arguments["area_hectare"])
+            span.set_attribute("crop", arguments["crop"])
             
-            return [
-                {
-                    "type": "text",
-                    "text": f"Insurance recommendation generated successfully. PDF size: {len(pdf_data)} bytes"
-                },
-                {
-                    "type": "resource",
-                    "uri": f"data:application/pdf;base64,{pdf_base64}",
-                    "mimeType": "application/pdf",
-                    "text": "Insurance Recommendation PDF"
-                }
-            ]
-        else:
-            return [{"type": "text", "text": str(result)}]
+            # Increment the request counter
+            request_counter.add(1)  
+            
+            result = recommend_insurance(
+                MockRequest(),
+                arguments["disease"],
+                arguments["farmer_name"],
+                arguments["state"],
+                arguments["area_hectare"],
+                arguments["crop"]
+            )
+        
+            if hasattr(result, 'body'):
+                # If it's a StreamingResponse, extract the PDF data
+                pdf_data = b"".join(result.body)
+                pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+                
+                return [
+                    {
+                        "type": "text",
+                        "text": f"Insurance recommendation generated successfully. PDF size: {len(pdf_data)} bytes"
+                    },
+                    {
+                        "type": "resource",
+                        "uri": f"data:application/pdf;base64,{pdf_base64}",
+                        "mimeType": "application/pdf",
+                        "text": "Insurance Recommendation PDF"
+                    }
+                ]
+            else:
+                return [{"type": "text", "text": str(result)}]
     
     else:
         return [{"type": "text", "text": f"Unknown tool: {name}"}]
@@ -299,8 +345,8 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Sasya Arogya MCP HTTP Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
-    parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
+    parser.add_argument("--port", type=int, default=8010, help="Port to bind to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     
     args = parser.parse_args()
