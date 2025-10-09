@@ -1,4 +1,3 @@
-
 import random
 import pandas as pd
 
@@ -40,48 +39,52 @@ def get_registered_insurers(reset_rates: bool = False) -> pd.DataFrame:
 def get_insurance_companies(state: str = None) -> list:
     """
     Get list of available insurance companies.
-    
+
     Args:
         state: Optional state to filter companies
-        
+
     Returns:
         List of dictionaries with company information
     """
     try:
-        companies_df = get_registered_insurers()
-        
+        companies_df = get_registered_insurers(reset_rates=True)
+
         # Filter by state if provided
-        if state:
-            companies_df = companies_df[
-                companies_df['State'].str.lower() == state.lower()
-            ]
-        
+        # Insurance companies are not based on the states, they are registered in difference places
+
+        # if state:
+        #     companies_df = companies_df[
+        #         companies_df["State"].str.lower() == state.lower()
+        #     ]
+
         # Convert to list of dictionaries
         companies = []
         for _, row in companies_df.iterrows():
-            companies.append({
-                'name': row.get('Company_Name', 'Unknown'),
-                'address': row.get('Address', 'Address not available'),
-                'state': row.get('State', 'Unknown'),
-                'rate_multiplier': row.get('Rate_Multiplier', 1.0)
-            })
-        
+            companies.append(
+                {
+                    "name": row.get("Company_Name", "Unknown"),
+                    "address": row.get("Address", "Address not available"),
+                    "state": row.get("State", "Unknown"),
+                    "rate_multiplier": row.get("Rate_Multiplier", 1.0),
+                }
+            )
+
         return companies
-        
+
     except Exception as e:
         print(f"Error getting insurance companies: {e}")
         # Return default companies if error
         return [
             {
-                'name': 'General Insurance Corporation of India',
-                'address': 'New Delhi, India',
-                'state': 'Delhi',
-                'rate_multiplier': 1.0
+                "name": "General Insurance Corporation of India",
+                "address": "New Delhi, India",
+                "state": "Delhi",
+                "rate_multiplier": 1.0,
             },
             {
-                'name': 'Agriculture Insurance Company of India',
-                'address': 'Mumbai, India',
-                'state': 'Maharashtra',
-                'rate_multiplier': 1.0
-            }
+                "name": "Agriculture Insurance Company of India",
+                "address": "Mumbai, India",
+                "state": "Maharashtra",
+                "rate_multiplier": 1.0,
+            },
         ]
