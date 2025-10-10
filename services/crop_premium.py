@@ -1,4 +1,5 @@
 import pandas as pd
+from services.insurance_companies import get_registered_insurers
 
 
 # Load data from CSV files
@@ -73,13 +74,31 @@ def calculate_premium(crop: str, area_hectare: float, state: str) -> dict:
         govt_subsidy = total_premium * 0.9
         farmer_contribution = total_premium * 0.1
         
+        # Find the best insurance company
+        companies_df = get_registered_insurers(reset_rates=True)
+        best_company = None
+        lowest_gross_premium = float("inf")
+        
+        for index, company in companies_df.iterrows():
+            rate_multiplier = company["Rate_Multiplier"]
+            company_gross_premium = (sum_insured_per_hectare * area_hectare) * (actuarial_rate / 100) * rate_multiplier
+            if company_gross_premium < lowest_gross_premium:
+                lowest_gross_premium = company_gross_premium
+                best_company = company
+        
+        # Get insurance company info
+        insurance_company_name = best_company["Company_Name"] if best_company is not None else "No company available"
+        company_address = best_company["Address"] if best_company is not None else "Address not available"
+        
         return {
             'premium_per_hectare': premium_per_hectare,
             'total_premium': total_premium,
             'govt_subsidy': govt_subsidy,
             'farmer_contribution': farmer_contribution,
             'sum_insured_per_hectare': sum_insured_per_hectare,
-            'actuarial_rate': actuarial_rate
+            'actuarial_rate': actuarial_rate,
+            'insurance_company_name': insurance_company_name,
+            'company_address': company_address
         }
         
     except Exception as e:
@@ -90,5 +109,7 @@ def calculate_premium(crop: str, area_hectare: float, state: str) -> dict:
             'govt_subsidy': 0.0,
             'farmer_contribution': 0.0,
             'sum_insured_per_hectare': 0.0,
-            'actuarial_rate': 0.0
+            'actuarial_rate': 0.0,
+            'insurance_company_name': "No company available",
+            'company_address': "Address not available"
         }
