@@ -62,28 +62,11 @@ async def test_mcp_server():
             # Test 3: Generate insurance certificate
             print("\n📄 Testing generate_insurance_certificate...")
             certificate_data = {
-                "policy_id": "PMFBY-2024-001",
                 "farmer_name": "Ramesh Kumar",
-                "farmer_id": "F12345",
-                "insurance_company_name": "ABC Insurance Ltd",
-                "company_address": "123 Main St, Bangalore",
-                "sum_insured_per_hectare": 50000.0,
-                "farmer_share_percent": 2.0,
-                "actuarial_rate_percent": 3.5,
-                "cut_off_date": "2024-12-31",
-                "crop_details": {
-                    "name": "Wheat",
-                    "area_hectare": 2.5,
-                    "premium_paid_by_farmer": 2500.0,
-                    "premium_paid_by_govt": 7500.0,
-                    "total_sum_insured": 125000.0
-                },
-                "terms_and_conditions": [
-                    "This policy covers natural calamities and pest attacks",
-                    "Claims must be filed within 15 days of damage",
-                    "Assessment will be done by authorized personnel",
-                    "Payment will be made within 30 days of claim approval"
-                ]
+                "state": "Karnataka",
+                "area_hectare": 2.5,
+                "crop": "Wheat",
+                "disease": "Powdery Mildew"
             }
             
             cert_result = await session.call_tool(

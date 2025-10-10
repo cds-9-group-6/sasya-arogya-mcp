@@ -59,36 +59,17 @@ async def main():
             ),
             Tool(
                 name="generate_insurance_certificate",
-                description="Generate an insurance certificate PDF for a farmer",
+                description="Generate an insurance certificate PDF for a farmer with automatic premium calculations",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "policy_id": {"type": "string", "description": "Unique policy identifier"},
                         "farmer_name": {"type": "string", "description": "Name of the farmer"},
-                        "farmer_id": {"type": "string", "description": "Farmer identification number"},
-                        "insurance_company_name": {"type": "string", "description": "Name of the insurance company"},
-                        "company_address": {"type": "string", "description": "Address of the insurance company"},
-                        "sum_insured_per_hectare": {"type": "number", "description": "Sum insured per hectare in rupees"},
-                        "farmer_share_percent": {"type": "number", "description": "Farmer's share percentage"},
-                        "actuarial_rate_percent": {"type": "number", "description": "Actuarial rate percentage"},
-                        "cut_off_date": {"type": "string", "description": "Cut-off date for the policy"},
-                        "crop_details": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "area_hectare": {"type": "number"},
-                                "premium_paid_by_farmer": {"type": "number"},
-                                "premium_paid_by_govt": {"type": "number"},
-                                "total_sum_insured": {"type": "number"}
-                            }
-                        },
-                        "terms_and_conditions": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "List of terms and conditions"
-                        }
+                        "state": {"type": "string", "description": "State where the farmer is located"},
+                        "area_hectare": {"type": "number", "description": "Area of cultivation in hectares"},
+                        "crop": {"type": "string", "description": "Name of the crop being cultivated"},
+                        "disease": {"type": "string", "description": "Name of the plant disease affecting the crop (optional)"}
                     },
-                    "required": ["policy_id", "farmer_name", "farmer_id", "insurance_company_name", "company_address", "sum_insured_per_hectare", "farmer_share_percent", "actuarial_rate_percent", "cut_off_date", "crop_details", "terms_and_conditions"]
+                    "required": ["farmer_name", "state", "area_hectare", "crop"]
                 }
             )
         ]
@@ -137,7 +118,15 @@ async def main():
                 class MockRequest:
                     pass
                 
-                result = generate_certificate(MockRequest(), arguments)
+                # Use the insurance advisor to calculate all policy details
+                result = recommend_insurance(
+                    MockRequest(),
+                    arguments["farmer_name"],
+                    arguments["state"],
+                    arguments["area_hectare"],
+                    arguments["crop"],
+                    arguments.get("disease")  # Optional disease parameter
+                )
                 
                 if hasattr(result, 'body'):
                     # If it's a StreamingResponse, extract the PDF data

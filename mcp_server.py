@@ -19,7 +19,7 @@ from mcp.types import (
 )
 
 from services.crop_premium import calculate_premium
-from services.insurance_advisor import recommend_insurance
+from services.insurance_advisor import recommend_insurance, calculate_policy_details
 from services.insurance_certificate import generate_certificate
 from services.insurance_companies import get_insurance_companies
 
@@ -68,63 +68,32 @@ class SasyaArogyaMCPServer:
                 ),
                 Tool(
                     name="generate_insurance_certificate",
-                    description="Generate an insurance certificate PDF for a farmer",
+                    description="Generate an insurance certificate PDF for a farmer with automatic premium calculations",
                     inputSchema={
                         "type": "object",
                         "properties": {
-                            "policy_id": {
-                                "type": "string",
-                                "description": "Unique policy identifier"
-                            },
                             "farmer_name": {
                                 "type": "string",
                                 "description": "Name of the farmer"
                             },
-                            "farmer_id": {
+                            "state": {
                                 "type": "string",
-                                "description": "Farmer identification number"
+                                "description": "State where the farmer is located"
                             },
-                            "insurance_company_name": {
-                                "type": "string",
-                                "description": "Name of the insurance company"
-                            },
-                            "company_address": {
-                                "type": "string",
-                                "description": "Address of the insurance company"
-                            },
-                            "sum_insured_per_hectare": {
+                            "area_hectare": {
                                 "type": "number",
-                                "description": "Sum insured per hectare in rupees"
+                                "description": "Area of cultivation in hectares"
                             },
-                            "farmer_share_percent": {
-                                "type": "number",
-                                "description": "Farmer's share percentage"
-                            },
-                            "actuarial_rate_percent": {
-                                "type": "number",
-                                "description": "Actuarial rate percentage"
-                            },
-                            "cut_off_date": {
+                            "crop": {
                                 "type": "string",
-                                "description": "Cut-off date for the policy"
+                                "description": "Name of the crop being cultivated"
                             },
-                            "crop_details": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"},
-                                    "area_hectare": {"type": "number"},
-                                    "premium_paid_by_farmer": {"type": "number"},
-                                    "premium_paid_by_govt": {"type": "number"},
-                                    "total_sum_insured": {"type": "number"}
-                                }
-                            },
-                            "terms_and_conditions": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "description": "List of terms and conditions"
+                            "disease": {
+                                "type": "string",
+                                "description": "Name of the plant disease affecting the crop (optional)"
                             }
                         },
-                        "required": ["policy_id", "farmer_name", "farmer_id", "insurance_company_name", "company_address", "sum_insured_per_hectare", "farmer_share_percent", "actuarial_rate_percent", "cut_off_date", "crop_details", "terms_and_conditions"]
+                        "required": ["farmer_name", "state", "area_hectare", "crop"]
                     }
                 ),
                 Tool(
@@ -210,16 +179,46 @@ class SasyaArogyaMCPServer:
                     class MockRequest:
                         pass
                     
-                    result = generate_certificate(MockRequest(), arguments)
+                    # First calculate premium data for the text response
+                    premium_data = calculate_premium(
+                        arguments["crop"],
+                        arguments["area_hectare"],
+                        arguments["state"]
+                    )
+                    
+                    # Use the insurance advisor to calculate all policy details and generate certificate
+                    result = recommend_insurance(
+                        MockRequest(),
+                        arguments["farmer_name"],
+                        arguments["state"],
+                        arguments["area_hectare"],
+                        arguments["crop"],
+                        arguments.get("disease")  # Optional disease parameter
+                    )
                     
                     if hasattr(result, 'body'):
                         # If it's a StreamingResponse, extract the PDF data
                         pdf_data = b"".join(result.body)
+                        
+                        # Create detailed text response with premium calculations
+                        premium_text = (
+                            f"Insurance certificate generated successfully for {arguments['farmer_name']}!\n\n"
+                            f"Premium calculation for {arguments['crop']} in {arguments['state']}:\n"
+                            f"Area: {arguments['area_hectare']} hectares\n"
+                            f"Premium per hectare: ₹{premium_data.get('premium_per_hectare', 0):.2f}\n"
+                            f"Total premium: ₹{premium_data.get('total_premium', 0):.2f}\n"
+                            f"Government subsidy: ₹{premium_data.get('govt_subsidy', 0):.2f}\n"
+                            f"Farmer contribution: ₹{premium_data.get('farmer_contribution', 0):.2f}\n"
+                            f"Insurance Company: {premium_data.get('insurance_company_name', 'N/A')}\n"
+                            f"Company Address: {premium_data.get('company_address', 'N/A')}\n\n"
+                            f"PDF certificate size: {len(pdf_data)} bytes"
+                        )
+                        
                         return CallToolResult(
                             content=[
                                 TextContent(
                                     type="text",
-                                    text=f"Insurance certificate generated successfully. PDF size: {len(pdf_data)} bytes"
+                                    text=premium_text
                                 ),
                                 EmbeddedResource(
                                     uri="data:application/pdf;base64," + 
@@ -249,7 +248,9 @@ class SasyaArogyaMCPServer:
                                  f"Premium per hectare: ₹{premium_data.get('premium_per_hectare', 0):.2f}\n" +
                                  f"Total premium: ₹{premium_data.get('total_premium', 0):.2f}\n" +
                                  f"Government subsidy: ₹{premium_data.get('govt_subsidy', 0):.2f}\n" +
-                                 f"Farmer contribution: ₹{premium_data.get('farmer_contribution', 0):.2f}"
+                                 f"Farmer contribution: ₹{premium_data.get('farmer_contribution', 0):.2f}\n" +
+                                 f"Insurance Company: {premium_data.get('insurance_company_name', 'N/A')}\n" +
+                                 f"Company Address: {premium_data.get('company_address', 'N/A')}"
                         )]
                     )
                 
