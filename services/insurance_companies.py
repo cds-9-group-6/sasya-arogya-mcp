@@ -47,7 +47,7 @@ def get_insurance_companies(state: str = None) -> list:
         List of dictionaries with company information
     """
     try:
-        companies_df = get_registered_insurers(reset_rates=True)
+        companies_df = get_registered_insurers(reset_rates=False)
 
         # Filter by state if provided
         # Insurance companies are not based on the states, they are registered in difference places

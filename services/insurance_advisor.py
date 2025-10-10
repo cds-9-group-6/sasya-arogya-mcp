@@ -3,13 +3,16 @@ from datetime import datetime, timedelta
 
 from fastapi import Request
 
-from services.crop_premium import get_crop_premium_data
+from services.shared_utils import get_crop_premium_data
+
 # from services.insurance_certificate import generate_certificate
 from services.insurance_certificate import generate_certificate
 from services.insurance_companies import get_registered_insurers
 
 
-def recommend_insurance(request: Request, name, state, area_hectare, crop, disease=None):
+def recommend_insurance(
+    request: Request, name, state, area_hectare, crop, disease=None
+):
     policy_data = calculate_policy_details(name, state, area_hectare, crop)
     print(f"Generated Policy Data: {policy_data}")
     response = generate_certificate(request, policy_data)
@@ -31,8 +34,9 @@ def calculate_policy_details(name, state, area_hectare, crop) -> dict:
     crop_name = crop
     area_hectare = area_hectare
     crop_df = get_crop_premium_data()
+
     # Load insurance companies data and reset rates (randomize) for demo purposes
-    companies_df = get_registered_insurers(reset_rates=True)
+    companies_df = get_registered_insurers(reset_rates=False)
 
     if not all([farmer_name, crop_name, area_hectare]):
         raise ValueError("All fields are required.")
