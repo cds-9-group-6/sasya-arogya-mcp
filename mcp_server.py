@@ -200,11 +200,15 @@ class SasyaArogyaMCPServer:
                         # If it's a StreamingResponse, extract the PDF data
                         pdf_data = b"".join(result.body)
                         
+                        # Get sum insured (already the total amount)
+                        total_sum_insured = premium_data.get('sum_insured_per_hectare', 0)
+                        
                         # Create detailed text response with premium calculations
                         premium_text = (
                             f"Insurance certificate generated successfully for {arguments['farmer_name']}!\n\n"
                             f"Premium calculation for {arguments['crop']} in {arguments['state']}:\n"
                             f"Area: {arguments['area_hectare']} hectares\n"
+                            f"Sum insured: ₹{total_sum_insured:.2f}\n"
                             f"Premium per hectare: ₹{premium_data.get('premium_per_hectare', 0):.2f}\n"
                             f"Total premium: ₹{premium_data.get('total_premium', 0):.2f}\n"
                             f"Government subsidy: ₹{premium_data.get('govt_subsidy', 0):.2f}\n"
@@ -245,6 +249,7 @@ class SasyaArogyaMCPServer:
                             type="text",
                             text=f"Premium calculation for {arguments['crop']} in {arguments['state']}:\n" +
                                  f"Area: {arguments['area_hectare']} hectares\n" +
+                                 f"Sum insured per hectare: ₹{premium_data.get('sum_insured_per_hectare', 0):.2f}\n" +
                                  f"Premium per hectare: ₹{premium_data.get('premium_per_hectare', 0):.2f}\n" +
                                  f"Total premium: ₹{premium_data.get('total_premium', 0):.2f}\n" +
                                  f"Government subsidy: ₹{premium_data.get('govt_subsidy', 0):.2f}\n" +
