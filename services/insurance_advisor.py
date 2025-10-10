@@ -78,7 +78,7 @@ def calculate_policy_details(name, state, area_hectare, crop) -> dict:
         "policy_id": policy_id,
         "farmer_name": farmer_name.title(),
         "farmer_id": farmer_id,
-        "insurance_company_name": best_company["Company Name"],
+        "insurance_company_name": best_company["Company_Name"],
         "company_address": best_company["Address"],
         "sum_insured_per_hectare": scale_of_finance,
         "farmer_share_percent": farmer_share_percent * 100,
